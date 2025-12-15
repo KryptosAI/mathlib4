@@ -31,13 +31,10 @@ variable [Semiring R] [Semiring S] [Semiring T] {f : M → N} {a : M} {r : R}
 
 /-- Given a function `f : M → N` between magmas, return the corresponding map `R[M] → R[N]` obtained
 by summing the coefficients along each fiber of `f`. -/
-@[to_additive
+@[to_additive (attr := simps)
 /-- Given a function `f : M → N` between magmas, return the corresponding map `R[M] → R[N]` obtained
 by summing the coefficients along each fiber of `f`. -/]
 def mapDomain (f : M → N) (x : R[M]) : R[N] := .ofCoeff <| Finsupp.mapDomain f x.coeff
-
-@[to_additive (attr := simp)]
-lemma coeff_mapDomain (f : M → N) (x : R[M]) : (mapDomain f x).coeff = x.coeff.mapDomain f := rfl
 
 @[to_additive (attr := simp)]
 lemma mapDomain_zero (f : M → N) : mapDomain f (0 : R[M]) = 0 := by ext; simp
@@ -66,14 +63,10 @@ theorem mapDomain_one [One M] [One N] {F : Type*} [FunLike F M N] [OneHomClass F
 
 /-- Given a map `f : R → S`, return the corresponding map `R[M] → S[M]` obtained by mapping
 each coefficient along `f`. -/
-@[to_additive
+@[to_additive (attr := simps)
 /-- Given a map `f : R → S`, return the corresponding map `R[M] → S[M]` obtained by mapping
 each coefficient along `f`. -/]
 def mapRange (f : R →+ S) (x : R[M]) : S[M] := .ofCoeff <| .mapRange f f.map_zero x.coeff
-
-@[to_additive (attr := simp)]
-lemma coeff_mapRange (f : R →+ S) (x : R[M]) :
-    (mapRange f x).coeff = x.coeff.mapRange f f.map_zero := rfl
 
 @[to_additive (attr := simp)]
 lemma mapRange_zero (f : R →+ S) : mapRange f (0 : R[M]) = 0 := by ext; simp
