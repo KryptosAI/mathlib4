@@ -22,7 +22,7 @@ open Finsupp hiding single mapDomain
 
 noncomputable section
 
-variable {F R S T M N O : Type*}
+variable {ι F R S T M N O : Type*}
 
 /-! ### Multiplicative monoids -/
 
@@ -58,6 +58,40 @@ lemma mapDomain_injective (hf : Injective f) : Injective (mapDomain (R := R) f) 
 theorem mapDomain_one [One M] [One N] {F : Type*} [FunLike F M N] [OneHomClass F M N] (f : F) :
     mapDomain f (1 : R[M]) = (1 : R[N]) := by
   simp [one_def]
+
+/-- Given a map `f : R → S`, return the corresponding map `R[M] → S[M]` obtained by mapping
+each coefficient along `f`. -/
+@[to_additive
+/-- Given a map `f : R → S`, return the corresponding map `R[M] → S[M]` obtained by mapping
+each coefficient along `f`. -/]
+def mapRange (f : R →+ S) (x : R[M]) : S[M] := .ofCoeff <| .mapRange f f.map_zero x
+
+@[to_additive (attr := simp)]
+lemma coeff_mapRange (f : R →+ S) (x : R[M]) : (mapRange f x) = Finsupp.mapRange f f.map_zero x :=
+  rfl
+
+@[to_additive (attr := simp)]
+lemma mapRange_zero (f : R →+ S) : mapRange f (0 : R[M]) = 0 :=
+  Finsupp.mapRange_zero (hf := f.map_zero)
+
+@[to_additive]
+lemma mapRange_add (f : R →+ S) (x y : R[M]) :
+    mapRange f (x + y) = mapRange f x + mapRange f y := by ext; simp
+
+@[to_additive]
+lemma mapRange_sum (f : R →+ S) (s : Finset ι) (x : ι → R[M]) :
+    mapRange f (∑ i ∈ s, x i) = ∑ i ∈ s, mapRange f (x i) := mapRange_finset_sum ..
+
+@[to_additive (attr := simp)]
+lemma mapRange_single (f : R →+ S) (r : R) (m : M) : mapRange f (single m r) = single m (f r) :=
+  Finsupp.mapRange_single (hf := f.map_zero)
+
+@[to_additive (attr := simp)]
+lemma mapRange_id (x : R[M]) : mapRange (.id R) x = x := by simp [mapRange, ofCoeff]
+
+@[to_additive (attr := simp)]
+lemma mapRange_mapRange (f : S →+ T) (g : R →+ S) (x : R[M]) :
+    mapRange f (mapRange g x) = mapRange (f.comp g) x := by simp [mapRange, ofCoeff]
 
 section Mul
 variable [Mul M] [Mul N] [Mul O] [FunLike F M N] [MulHomClass F M N]
@@ -131,8 +165,8 @@ variable (M) in
 
 `Finsupp.mapRange` as an `AddEquiv`. -/]
 def mapRangeAddEquiv (e : R ≃+ S) : R[M] ≃+ S[M] where
-  toFun x := .mapRange e e.map_zero x
-  invFun x := .mapRange e.symm e.symm.map_zero x
+  toFun x := Finsupp.mapRange e e.map_zero x
+  invFun x := Finsupp.mapRange e.symm e.symm.map_zero x
   left_inv x := by ext; simp
   right_inv x := by ext; simp
   map_add' x y := by ext; simp
@@ -187,9 +221,9 @@ variable (M) in
 /-- The ring homomorphism of additive monoid algebras induced by a homomorphism of the base rings.
 -/]
 noncomputable def mapRangeRingHom (f : R →+* S) : R[M] →+* S[M] where
-  toFun := mapRange f f.map_zero
-  map_zero' := mapRange_zero
-  map_add' := mapRange_add f.map_add
+  toFun := Finsupp.mapRange f f.map_zero
+  map_zero' := Finsupp.mapRange_zero
+  map_add' := Finsupp.mapRange_add f.map_add
   map_one' := by ext; simp [one_def]
   map_mul' _ _ := by
     classical
@@ -199,7 +233,7 @@ noncomputable def mapRangeRingHom (f : R →+* S) : R[M] →+* S[M] where
 
 @[to_additive]
 lemma coe_mapRangeRingHom (f : R →+* S) :
-    ⇑(mapRangeRingHom M f) = mapRange f (map_zero _) := by
+    ⇑(mapRangeRingHom M f) = Finsupp.mapRange f (map_zero _) := by
   simp [mapRangeRingHom]
 
 @[to_additive (attr := simp)]
